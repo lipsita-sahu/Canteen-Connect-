@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Canteen Connect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --leaf:#1F5134; --leaf-deep:#12301F; --leaf-soft:#E4EDE6;
+  --chilli:#B8331C; --chilli-soft:#FBE9E5;
+  --turmeric:#B87500; --turmeric-soft:#FBF0DC;
+  --paper:#F3F5F1; --card:#FFFFFF; --ink:#141A16; --ink-2:#4A5850; --ink-3:#7C8A82;
+  --line:#DCE2DA; --line-2:#EDF0EB;
+  --shadow:0 1px 2px rgba(20,26,22,.05), 0 8px 24px -14px rgba(20,26,22,.28);
+  --r:14px; --r-sm:9px;
+  --sans:'Karla',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --disp:'Archivo',var(--sans);
+  --maxw:1180px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#10150F; --card:#171E19; --ink:#EAF0EA; --ink-2:#A8B6AC; --ink-3:#7E8D83;
+    --line:#26302A; --line-2:#1D2620; --leaf:#5FA47A; --leaf-soft:#1A261E; --leaf-deep:#0B120D;
+    --chilli:#E2705A; --chilli-soft:#2A1A17; --turmeric:#D9A036; --turmeric-soft:#2A2113;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10150F; --card:#171E19; --ink:#EAF0EA; --ink-2:#A8B6AC; --ink-3:#7E8D83;
+  --line:#26302A; --line-2:#1D2620; --leaf:#5FA47A; --leaf-soft:#1A261E; --leaf-deep:#0B120D;
+  --chilli:#E2705A; --chilli-soft:#2A1A17; --turmeric:#D9A036; --turmeric-soft:#2A2113;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -16px rgba(0,0,0,.8);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--disp);margin:0;letter-spacing:-.02em;line-height:1.12;font-weight:700}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--leaf)}
+:focus-visible{outline:2.5px solid var(--leaf);outline-offset:2px;border-radius:4px}
+img{max-width:100%}
+.hide{display:none !important}
+@media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+
+/* ---------- primitives ---------- */
+.btn{border:1px solid transparent;border-radius:var(--r-sm);padding:.62rem 1rem;font-weight:600;font-size:.94rem;background:var(--leaf);color:#fff;transition:filter .15s ease, background .15s ease}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn.ghost:hover{background:var(--line-2);filter:none}
+.btn.quiet{background:var(--leaf-soft);color:var(--leaf);border-color:transparent}
+.btn.danger{background:transparent;border-color:var(--line);color:var(--chilli)}
+.btn.sm{padding:.4rem .7rem;font-size:.85rem}
+.btn.block{width:100%;display:block}
+.field{display:block;margin-bottom:.85rem}
+.field > span{display:block;font-size:.83rem;color:var(--ink-2);margin-bottom:.3rem;font-weight:600}
+.input{width:100%;padding:.66rem .8rem;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--card);color:var(--ink)}
+.input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 3px var(--leaf-soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+.muted{color:var(--ink-3)}
+.err{color:var(--chilli);font-size:.86rem;margin:.3rem 0 .6rem;min-height:1.1em}
+.tag{display:inline-flex;align-items:center;gap:.34rem;font-size:.76rem;font-weight:600;padding:.16rem .5rem;border-radius:100px;background:var(--line-2);color:var(--ink-2)}
+.dot{width:.62rem;height:.62rem;border:1.6px solid currentColor;border-radius:2px;position:relative;display:inline-block}
+.dot::after{content:"";position:absolute;inset:1.6px;border-radius:50%;background:currentColor}
+.veg{color:#2E7D32}.nonveg{color:var(--chilli)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .veg{color:#6FBF73}}
+:root[data-theme="dark"] .veg{color:#6FBF73}
+
+/* ---------- landing ---------- */
+#landing{min-height:100svh;display:grid;grid-template-columns:1.05fr .95fr}
+.land-left{background:var(--leaf-deep);color:#EDF3EE;padding:clamp(1.6rem,4vw,3.4rem);display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.tray{position:absolute;inset:auto -12% -22% -12%;height:58%;opacity:.16;
+  background:
+   radial-gradient(circle at 22% 46%, transparent 62px, #9FD3B0 63px, #9FD3B0 65px, transparent 66px),
+   radial-gradient(circle at 55% 46%, transparent 40px, #9FD3B0 41px, #9FD3B0 43px, transparent 44px),
+   radial-gradient(circle at 78% 46%, transparent 40px, #9FD3B0 41px, #9FD3B0 43px, transparent 44px);
+  pointer-events:none}
+.mark{display:flex;align-items:center;gap:.6rem;font-family:var(--disp);font-weight:800;font-size:1.12rem;letter-spacing:-.03em}
+.mark .glyph{width:30px;height:30px;border-radius:8px;background:#9FD3B0;color:#12301F;display:grid;place-items:center;font-size:.95rem}
+.land-hero{padding:3.2rem 0 2rem;max-width:20ch}
+.land-hero h1{font-size:clamp(2.5rem,6.2vw,4.3rem);font-weight:800;letter-spacing:-.045em}
+.land-hero p{font-size:clamp(1.02rem,1.5vw,1.22rem);color:#A9C9B5;margin:1.1rem 0 0;max-width:26ch;line-height:1.35}
+.canteen-strip{display:flex;flex-wrap:wrap;gap:.45rem;position:relative}
+.canteen-strip span{font-size:.82rem;padding:.3rem .66rem;border:1px solid rgba(159,211,176,.32);border-radius:100px;color:#A9C9B5}
+.land-right{display:grid;place-items:center;padding:clamp(1.4rem,4vw,3rem)}
+.login-card{width:min(400px,100%)}
+.login-card .inner{padding:1.5rem}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem;background:var(--line-2);padding:.25rem;border-radius:var(--r-sm);margin-bottom:1.15rem}
+.seg button{background:transparent;border:0;padding:.5rem .3rem;border-radius:7px;font-weight:600;font-size:.88rem;color:var(--ink-2)}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.demo{margin-top:1rem;font-size:.82rem;color:var(--ink-3);border-top:1px solid var(--line-2);padding-top:.8rem}
+.demo b{color:var(--ink-2);font-weight:600}
+@media (max-width:860px){
+  #landing{grid-template-columns:1fr}
+  .land-left{padding-bottom:2rem}
+  .land-hero{padding:2rem 0 1.4rem}
+  .tray{display:none}
+}
+
+/* ---------- app shell ---------- */
+#app{display:grid;grid-template-columns:232px 1fr;min-height:100svh}
+.rail{background:var(--card);border-right:1px solid var(--line);padding:1.1rem .8rem;display:flex;flex-direction:column;gap:.15rem;position:sticky;top:0;height:100svh;overflow:auto}
+.rail .mark{color:var(--ink);margin:.2rem .4rem 1.1rem}
+.rail .mark .glyph{background:var(--leaf);color:#fff}
+.nav{display:flex;flex-direction:column;gap:.1rem}
+.nav button{display:flex;align-items:center;gap:.6rem;background:transparent;border:0;text-align:left;padding:.56rem .6rem;border-radius:9px;font-weight:600;font-size:.92rem;color:var(--ink-2);width:100%}
+.nav button:hover{background:var(--line-2)}
+.nav button[aria-current="page"]{background:var(--leaf-soft);color:var(--leaf)}
+.nav .ico{width:19px;text-align:center;flex:none}
+.pill{margin-left:auto;background:var(--chilli);color:#fff;font-size:.7rem;font-weight:700;border-radius:100px;padding:.02rem .38rem;min-width:1.1rem;text-align:center}
+.rail-foot{margin-top:auto;padding-top:.8rem;border-top:1px solid var(--line-2)}
+.who{padding:.5rem .6rem;border-radius:9px;background:var(--line-2);margin-bottom:.5rem}
+.who b{display:block;font-size:.9rem}
+.who span{font-size:.78rem;color:var(--ink-3)}
+main{padding:clamp(1rem,2.6vw,1.9rem);max-width:var(--maxw);width:100%}
+.topbar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;margin-bottom:1.3rem}
+.topbar h2{font-size:clamp(1.35rem,2.6vw,1.75rem)}
+.topbar .spacer{flex:1}
+.mobile-top{display:none}
+.tabbar{display:none}
+@media (max-width:820px){
+  #app{grid-template-columns:1fr}
+  .rail{display:none}
+  main{padding:.9rem .9rem 5.6rem}
+  .mobile-top{display:flex;align-items:center;gap:.7rem;padding:.7rem .9rem;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:30}
+  .mobile-top .mark{font-size:1rem}
+  .mobile-top .mark .glyph{background:var(--leaf);color:#fff;width:26px;height:26px}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:.35rem .25rem;padding-bottom:calc(.35rem + env(safe-area-inset-bottom,0px));z-index:40}
+  .tabbar button{background:transparent;border:0;display:flex;flex-direction:column;align-items:center;gap:.12rem;font-size:.68rem;font-weight:600;color:var(--ink-3);padding:.3rem .1rem;border-radius:9px;position:relative}
+  .tabbar button[aria-current="page"]{color:var(--leaf)}
+  .tabbar .ico{font-size:1.06rem}
+  .tabbar .pill{position:absolute;top:.05rem;right:22%}
+}
+
+/* ---------- canteen picker ---------- */
+.canteen-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:.85rem}
+.canteen-card{text-align:left;padding:1.05rem;border:1px solid var(--line);border-radius:var(--r);background:var(--card);display:flex;flex-direction:column;gap:.45rem;transition:border-color .15s ease}
+.canteen-card:hover{border-color:var(--leaf)}
+.canteen-card h3{font-size:1.08rem}
+.canteen-card .meta{font-size:.84rem;color:var(--ink-3)}
+.canteen-card .state{font-size:.8rem;font-weight:600;margin-top:.3rem}
+.state.live{color:var(--leaf)}
+.state.soon{color:var(--turmeric)}
+.ctx{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.7rem .9rem;border-radius:var(--r);background:var(--leaf-soft);color:var(--leaf);margin-bottom:1.1rem;font-weight:600;font-size:.92rem}
+.ctx .hrs{font-weight:500;color:var(--ink-2)}
+
+/* ---------- menu ---------- */
+.toolbar{display:flex;gap:.55rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.search{flex:1;min-width:210px;position:relative}
+.search input{padding-left:2.1rem}
+.search .mag{position:absolute;left:.72rem;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.chips{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.3rem;margin-bottom:1.1rem;scrollbar-width:thin}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:100px;padding:.36rem .8rem;font-size:.86rem;font-weight:600;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cat-head{display:flex;align-items:baseline;gap:.6rem;margin:1.6rem 0 .8rem}
+.cat-head h3{font-size:1.16rem}
+.cat-head span{font-size:.84rem;color:var(--ink-3)}
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.85rem}
+@media (max-width:520px){.food-grid{grid-template-columns:repeat(2,1fr);gap:.65rem}}
+.food{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;text-align:left;position:relative}
+.food .thumb{aspect-ratio:4/3;display:grid;place-items:center;position:relative;background:var(--line-2)}
+.food .thumb .art{width:46%;max-width:64px}
+.food .thumb .art svg{display:block;width:100%;height:100%}
+.food .body{padding:.6rem .68rem .68rem;display:flex;flex-direction:column;gap:.28rem;flex:1}
+.food h4{font-size:.94rem;font-weight:700;line-height:1.24;font-family:var(--sans)}
+.food .price{font-family:var(--disp);font-weight:700;font-size:1.02rem}
+.food .price.tbc{font-size:.8rem;font-weight:600;color:var(--turmeric);background:var(--turmeric-soft);padding:.16rem .44rem;border-radius:6px;align-self:flex-start}
+.food .row{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.food .prep{font-size:.78rem;color:var(--ink-3)}
+.food .acts{margin-top:auto;padding-top:.5rem;display:flex;gap:.35rem}
+.food .acts .btn{flex:1}
+.fav{position:absolute;top:.45rem;right:.45rem;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.92);border:1px solid var(--line);display:grid;place-items:center;font-size:.9rem;color:var(--ink-3);z-index:2}
+.fav[aria-pressed="true"]{color:var(--chilli);border-color:var(--chilli)}
+.soldout{position:absolute;inset:0;background:rgba(255,255,255,.66);display:grid;place-items:center;font-weight:700;font-size:.82rem;color:var(--ink-2)}
+:root[data-theme="dark"] .soldout{background:rgba(0,0,0,.55)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .soldout{background:rgba(0,0,0,.55)}}
+.empty{text-align:center;padding:3rem 1rem;color:var(--ink-3)}
+.empty .big{font-size:2rem;margin-bottom:.4rem}
+.empty h3{color:var(--ink);margin-bottom:.35rem}
+
+/* ---------- sheet / modal ---------- */
+.scrim{position:fixed;inset:0;background:rgba(10,16,12,.5);z-index:60;display:grid;place-items:center;padding:1rem;animation:fade .16s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{background:var(--card);border-radius:var(--r);width:min(520px,100%);max-height:88svh;overflow:auto;box-shadow:var(--shadow);animation:pop .18s ease}
+@keyframes pop{from{transform:translateY(10px);opacity:.6}to{transform:none;opacity:1}}
+.sheet .pad{padding:1.15rem}
+.sheet header{display:flex;align-items:flex-start;gap:.6rem;padding:1rem 1.15rem;border-bottom:1px solid var(--line-2);position:sticky;top:0;background:var(--card);z-index:2}
+.sheet header h3{font-size:1.1rem;flex:1}
+.x{background:transparent;border:0;font-size:1.3rem;line-height:1;color:var(--ink-3);padding:.1rem .3rem}
+.hero-thumb{aspect-ratio:16/9;background:var(--line-2);display:grid;place-items:center}
+.hero-thumb .art{width:34%;max-width:120px}
+.hero-thumb .art svg{display:block;width:100%;height:100%}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:100px;overflow:hidden}
+.qty button{background:transparent;border:0;padding:.3rem .72rem;font-size:1.05rem;font-weight:700;color:var(--leaf)}
+.qty span{min-width:2ch;text-align:center;font-weight:700;font-size:.95rem}
+
+/* ---------- lists / rows ---------- */
+.row-item{display:flex;gap:.75rem;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--line-2)}
+.row-item:last-child{border-bottom:0}
+.row-item .grow{flex:1;min-width:0}
+.row-item h4{font-size:.95rem;font-family:var(--sans);font-weight:700}
+.row-item .sub{font-size:.83rem;color:var(--ink-3)}
+.mini{width:48px;height:48px;border-radius:9px;background:var(--line-2);display:grid;place-items:center;font-size:1.25rem;flex:none}
+.total{display:flex;justify-content:space-between;padding:.45rem 0;font-size:.93rem;color:var(--ink-2)}
+.total.grand{font-family:var(--disp);font-weight:800;font-size:1.22rem;color:var(--ink);border-top:1px solid var(--line);margin-top:.5rem;padding-top:.7rem}
+.two-col{display:grid;grid-template-columns:1.35fr .9fr;gap:1rem;align-items:start}
+@media (max-width:820px){.two-col{grid-template-columns:1fr}}
+
+/* ---------- order tracking ---------- */
+.track{list-style:none;padding:0;margin:.4rem 0 0}
+.track li{display:flex;gap:.75rem;padding-bottom:1.05rem;position:relative}
+.track li:last-child{padding-bottom:0}
+.track li::before{content:"";position:absolute;left:11px;top:23px;bottom:-1px;width:2px;background:var(--line)}
+.track li:last-child::before{display:none}
+.track li.done::before{background:var(--leaf)}
+.track .bead{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.72rem;flex:none;background:var(--card);color:transparent;z-index:1}
+.track li.done .bead{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.track li.now .bead{border-color:var(--leaf);box-shadow:0 0 0 4px var(--leaf-soft);color:var(--leaf)}
+.track li.now .bead::after{content:"";width:9px;height:9px;border-radius:50%;background:var(--leaf)}
+.track .lab{font-weight:600;font-size:.94rem;padding-top:.1rem}
+.track li:not(.done):not(.now) .lab{color:var(--ink-3);font-weight:500}
+.track .at{font-size:.79rem;color:var(--ink-3);font-weight:500}
+.status{font-size:.78rem;font-weight:700;padding:.18rem .52rem;border-radius:100px;background:var(--leaf-soft);color:var(--leaf)}
+.status.warn{background:var(--turmeric-soft);color:var(--turmeric)}
+.status.bad{background:var(--chilli-soft);color:var(--chilli)}
+.status.done{background:var(--line-2);color:var(--ink-2)}
+
+/* ---------- admin ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem;margin-bottom:1.3rem}
+.stat{padding:.85rem .9rem;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.stat .n{font-family:var(--disp);font-size:1.8rem;font-weight:800;line-height:1}
+.stat .l{font-size:.81rem;color:var(--ink-3);margin-top:.22rem}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;font-weight:700;font-size:.79rem;color:var(--ink-3);padding:.5rem .55rem;border-bottom:1px solid var(--line)}
+td{padding:.6rem .55rem;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bars{display:flex;align-items:flex-end;gap:.5rem;height:150px;padding-top:.5rem}
+.bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:.35rem;height:100%}
+.bars .b i{width:100%;max-width:40px;background:var(--leaf);border-radius:5px 5px 0 0;display:block;min-height:2px}
+.bars .b small{font-size:.72rem;color:var(--ink-3)}
+.bars .b em{font-size:.75rem;font-style:normal;font-weight:700}
+
+/* ---------- toast ---------- */
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(1rem + env(safe-area-inset-bottom,0px));z-index:90;display:flex;flex-direction:column;gap:.4rem;width:min(420px,calc(100% - 1.6rem))}
+@media (max-width:820px){#toasts{bottom:calc(4.6rem + env(safe-area-inset-bottom,0px))}}
+.toast{background:var(--ink);color:var(--paper);padding:.65rem .85rem;border-radius:10px;font-size:.9rem;font-weight:600;box-shadow:var(--shadow);animation:pop .18s ease}
+.toast.good{background:var(--leaf);color:#fff}
+.toast.bad{background:var(--chilli);color:#fff}
+</style>
+</head>
+<body>
+<div id="toasts"></div>
+
+<!-- ================= LANDING ================= -->
+<div id="landing">
+  <div class="land-left">
+    <div class="mark"><span class="glyph">◗</span> Canteen Connect</div>
+    <div class="land-hero">
+      <h1>Order first,<br>walk up later.</h1>
+      <p>One campus. Four canteens. One simple way to order.</p>
+    </div>
+    <div class="canteen-strip">
+      <span>Girls Hostel Canteen</span>
+      <span>Advanced Block Canteen</span>
+      <span>Common Canteen</span>
+      <span>Architecture Block Canteen</span>
+    </div>
+    <div class="tray" aria-hidden="true"></div>
+  </div>
+  <div class="land-right">
+    <div class="login-card card">
+      <div class="inner">
+        <div class="seg" role="tablist" aria-label="Choose how you sign in">
+          <button role="tab" aria-selected="true" data-role="student">Student</button>
+          <button role="tab" aria-selected="false" data-role="teacher">Teacher</button>
+          <button role="tab" aria-selected="false" data-role="admin">Canteen staff</button>
+        </div>
+        <h2 id="loginTitle" style="font-size:1.3rem;margin-bottom:.15rem">Student sign in</h2>
+        <p class="muted" id="loginHint" style="font-size:.88rem;margin:0 0 1.1rem">Use the ID printed on your college card.</p>
+        <form id="loginForm" autocomplete="on">
+          <label class="field"><span id="idLabel">Student ID</span>
+            <input class="input" id="loginId" placeholder="24CSE1234" autocapitalize="characters" required></label>
+          <label class="field"><span>Password</span>
+            <input class="input" id="loginPw" type="password" placeholder="••••••••" required></label>
+          <p class="err" id="loginErr"></p>
+          <button class="btn block" type="submit">Sign in</button>
+        </form>
+        <div class="demo" id="demoBox"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hide">
+  <aside class="rail">
+    <div class="mark"><span class="glyph">◗</span> Canteen Connect</div>
+    <nav class="nav" id="railNav"></nav>
+    <div class="rail-foot">
+      <div class="who" id="railWho"></div>
+      <button class="btn ghost sm block" id="logoutBtn">Sign out</button>
+    </div>
+  </aside>
+  <div>
+    <div class="mobile-top">
+      <div class="mark"><span class="glyph">◗</span> Canteen Connect</div>
+      <div style="margin-left:auto;display:flex;gap:.4rem">
+        <button class="btn ghost sm" data-go="notifications" id="mNotif">🔔</button>
+        <button class="btn ghost sm" id="mLogout">Sign out</button>
+      </div>
+    </div>
+    <main id="view"></main>
+  </div>
+</div>
+<nav class="tabbar hide" id="tabbar"></nav>
+
+<div id="modalHost"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Canteen Connect — single-file app
+   Storage: localStorage (per browser), guarded. Passwords are
+   stored only as SHA-256 hashes; plain text is never persisted.
+   ============================================================ */
+
+const LS = {
+  key: 'canteenconnect.v1',
+  read(){ try{ const r = localStorage.getItem(this.key); return r ? JSON.parse(r) : null; }catch(e){ return null; } },
+  write(d){ try{ localStorage.setItem(this.key, JSON.stringify(d)); }catch(e){ /* storage may be unavailable */ } }
+};
+
+async function sha256(text){
+  try{
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }catch(e){ // very old browsers / insecure context
+    let h = 5381; for(const c of text) h = ((h<<5)+h+c.charCodeAt(0))>>>0;
+    return 'fallback:'+h.toString(16);
+  }
+}
+
+/* ---------------- seed data ---------------- */
+const CANTEENS = [
+  { id:'C1', name:'Girls Hostel Canteen',      location:'Girls Hostel Block',   open:'07:30', close:'21:00', menuReady:false },
+  { id:'C2', name:'Advanced Block Canteen',    location:'Advanced Block',       open:'08:00', close:'18:00', menuReady:false },
+  { id:'C3', name:'Common Canteen',            location:'Main Campus Quad',     open:'08:00', close:'20:00', menuReady:true  },
+  { id:'C4', name:'Architecture Block Canteen',location:'Architecture Block',   open:'08:30', close:'17:30', menuReady:false }
+];
+
+const CATEGORIES = [
+  { id:'CAT1', name:'Chat',            icon:'🥣' },
+  { id:'CAT2', name:'Tiffin Stall',    icon:'🫓' },
+  { id:'CAT3', name:'Chinese',         icon:'🍜' },
+  { id:'CAT4', name:'Burgers',         icon:'🍔' },
+  { id:'CAT5', name:'Crunchy Chicken', icon:'🍗' },
+  { id:'CAT6', name:'Snacks — Veg',    icon:'🍟' },
+  { id:'CAT7', name:'Snacks — Non-Veg',icon:'🍤' },
+  { id:'CAT8', name:'Wraps',           icon:'🌯' }
+];
+
+// price === null  =>  "Price to be confirmed" (admin fills it in later)
+// prep times are defaults the canteen staff can edit in Menu management.
+const M = (name, cat, price, diet, prep, desc) =>
+  ({ name, category_id:cat, price, dietary_type:diet, preparation_time:prep, description:desc||'', availability:true });
+
+const COMMON_MENU = [
+  // CATEGORY 1 — CHAT
+  M('Aloo Chaat','CAT1',30,'veg',8,'Boiled potato tossed with chutney, onion and sev.'),
+  M('Aloo Puri','CAT1',30,'veg',8,'Crisp puri topped with spiced potato.'),
+  M('Aloo Samosa','CAT1',15,'veg',5,'Fried samosa with potato filling.'),
+  M('Bhel Puri','CAT1',30,'veg',7,'Puffed rice, onion, chutney and sev.'),
+  M('Bread Omelette','CAT1',40,'nonveg',10,'Omelette folded between toasted bread.'),
+  M('Chena Masala','CAT1',40,'veg',10,'Chickpeas in a spiced masala.'),
+  M('Coffee','CAT1',15,'veg',3,'Hot filter-style coffee.'),
+  M('Dhahi Puri','CAT1',50,'veg',8,'Puri filled with curd, chutney and sev.'),
+  M('Dhahi Samosa','CAT1',40,'veg',8,'Samosa topped with curd and chutney.'),
+  M('Egg Puff','CAT1',15,'nonveg',5,'Flaky puff with a boiled egg centre.'),
+  M('Fry Pav Bhaji','CAT1',60,'veg',15,'Bhaji with extra-fried pav.'),
+  M('Masala Puri','CAT1',40,'veg',8,'Puri in hot green-pea masala.'),
+  M('Mix Chaat','CAT1',50,'veg',10,'A mix of the counter chaats in one plate.'),
+  M('Pani Puri','CAT1',25,'veg',5,'Puri with spiced water and filling.'),
+  M('Papdi Chaat','CAT1',40,'veg',8,'Papdi with curd, chutney and potato.'),
+  M('Parcel — Chat Items','CAT1',5,'veg',1,'Parcel charge for chat counter items.'),
+  M('Pav Bhaji','CAT1',50,'veg',15,'Mashed vegetable bhaji with buttered pav.'),
+  M('Samosa Chena','CAT1',40,'veg',8,'Samosa served with chickpea masala.'),
+  M('Sav Puri','CAT1',40,'veg',8,'Puri topped with sev and chutney.'),
+  M('Tea','CAT1',12,'veg',3,'Hot masala tea.'),
+  // CATEGORY 2 — TIFFIN STALL
+  M('Banana Bajji','CAT2',null,'veg',10,'Batter-fried banana fritters.'),
+  M('Bread Bajji','CAT2',null,'veg',10,'Batter-fried bread fritters.'),
+  M('Chapati (1 No)','CAT2',15,'veg',10,'Soft chapati with side gravy.'),
+  M('Chilly Bajji','CAT2',null,'veg',10,'Batter-fried chilli fritters.'),
+  M('Curd Vadai','CAT2',30,'veg',8,'Vadai soaked in seasoned curd.'),
+  M('Ghee Dosai','CAT2',null,'veg',12,'Dosai roasted in ghee.'),
+  M('Idli (1 No)','CAT2',7,'veg',5,'Steamed idli with sambar and chutney.'),
+  M('Kal Dosai','CAT2',15,'veg',10,'Thick soft dosai.'),
+  M('Masala Dosai','CAT2',null,'veg',12,'Dosai with potato masala filling.'),
+  M('Masala Vadai','CAT2',5,'veg',6,'Crisp lentil vadai.'),
+  M('Medhu Vadai','CAT2',null,'veg',8,'Soft urad dal vadai.'),
+  M('Mini Idli (14 Nos)','CAT2',15,'veg',8,'Fourteen mini idlis with sambar.'),
+  M('Mysore Bonda','CAT2',10,'veg',8,'Fluffy fried bonda.'),
+  M('Onion Dosa','CAT2',null,'veg',12,'Dosai topped with onion.'),
+  M('Onion Kal Dosai','CAT2',20,'veg',12,'Thick dosai topped with onion.'),
+  M('Onion Pakoda (100 g)','CAT2',25,'veg',10,'Crisp onion pakoda by weight.'),
+  M('Onion Podi Dosai','CAT2',null,'veg',12,'Dosai with onion and podi.'),
+  M('Parotta (2 Nos)','CAT2',null,'veg',12,'Two layered parottas with salna.'),
+  M('Plain Dosai','CAT2',null,'veg',10,'Plain crisp dosai.'),
+  M('Podi Dosai','CAT2',null,'veg',10,'Dosai spread with podi.'),
+  M('Poori (2 Nos)','CAT2',25,'veg',10,'Two pooris with masala.'),
+  M('Sambar Vadai','CAT2',25,'veg',8,'Vadai soaked in hot sambar.'),
+  M('Tiffin Parcel','CAT2',5,'veg',1,'Parcel charge for tiffin stall items.'),
+  // CATEGORY 3 — CHINESE
+  M('Chicken 65 (Bone)','CAT3',80,'nonveg',15,'Spiced fried chicken, bone-in.'),
+  M('Chicken Fried Rice','CAT3',130,'nonveg',15,'Wok-tossed rice with chicken.'),
+  M('Chicken Kothu Parotta','CAT3',130,'nonveg',18,'Shredded parotta tossed with chicken.'),
+  M('Chicken Macaroni','CAT3',130,'nonveg',15,'Macaroni tossed with chicken.'),
+  M('Chicken Manchurian','CAT3',130,'nonveg',18,'Chicken in Manchurian sauce.'),
+  M('Chicken Noodles','CAT3',130,'nonveg',15,'Noodles tossed with chicken.'),
+  M('Chicken Pasta','CAT3',110,'nonveg',15,'Pasta tossed with chicken.'),
+  M('Chilli Chicken','CAT3',110,'nonveg',18,'Chicken in a hot chilli sauce.'),
+  M('Chilly Parotta','CAT3',60,'veg',15,'Parotta tossed in chilli sauce.'),
+  M('Egg Bonda','CAT3',null,'nonveg',10,'Fried bonda with egg.'),
+  M('Egg Dosai','CAT3',null,'nonveg',12,'Dosai with an egg spread over it.'),
+  M('Egg Fried Rice','CAT3',null,'nonveg',15,'Wok-tossed rice with egg.'),
+  M('Egg Full Boil','CAT3',null,'nonveg',5,'Whole boiled egg.'),
+  M('Egg Kalaki','CAT3',null,'nonveg',8,'Scrambled spiced egg.'),
+  M('Egg Kothu Parotta','CAT3',null,'nonveg',18,'Shredded parotta tossed with egg.'),
+  M('Egg Macaroni','CAT3',90,'nonveg',15,'Macaroni tossed with egg.'),
+  M('Egg Noodles','CAT3',null,'nonveg',15,'Noodles tossed with egg.'),
+  M('Egg Pasta','CAT3',90,'nonveg',15,'Pasta tossed with egg.'),
+  M('Egg Podimas','CAT3',null,'nonveg',10,'Crumbled seasoned egg.'),
+  M('Half Boiled Egg','CAT3',null,'nonveg',5,'Soft boiled egg.'),
+  M('Omelette','CAT3',null,'nonveg',8,'Plain or onion omelette.'),
+  M('Parcel — Chinese Stall','CAT3',5,'veg',1,'Parcel charge for Chinese stall items.'),
+  M('Veg Macaroni','CAT3',80,'veg',15,'Macaroni tossed with vegetables.'),
+  M('Veg Noodles','CAT3',80,'veg',15,'Noodles tossed with vegetables.'),
+  M('Veg Pasta','CAT3',80,'veg',15,'Pasta tossed with vegetables.'),
+  // CATEGORY 4 — BURGERS
+  M('Chicken Crunchy Burger','CAT4',null,'nonveg',12,'Crunchy fried chicken burger.'),
+  M('Chicken Kiddy Crunchy Burger','CAT4',null,'nonveg',12,'Smaller crunchy chicken burger.'),
+  M('Chicken Patty Burger','CAT4',null,'nonveg',12,'Chicken patty burger.'),
+  M('Chicken Tower Burger','CAT4',null,'nonveg',14,'Stacked chicken burger.'),
+  M('Veg Burger','CAT4',null,'veg',12,'Vegetable patty burger.'),
+  M('Paneer Cheese Burger','CAT4',null,'veg',12,'Paneer patty with cheese.'),
+  // CATEGORY 5 — CRUNCHY CHICKEN
+  M('Hot and Crunchy Chicken — 2 Pcs','CAT5',null,'nonveg',15,'Two pieces of hot crunchy chicken.'),
+  M('Hot and Crunchy Chicken — 4 Pcs','CAT5',null,'nonveg',18,'Four pieces of hot crunchy chicken.'),
+  M('Hot and Crunchy Chicken — 8 Pcs','CAT5',null,'nonveg',22,'Eight pieces of hot crunchy chicken.'),
+  // CATEGORY 6 — SNACKS VEG
+  M('French Fries','CAT6',null,'veg',10,'Salted fried potato fries.'),
+  M('Veg Nuggets — 5 Pcs','CAT6',null,'veg',10,'Five vegetable nuggets.'),
+  M('Smileys — 5 Pcs','CAT6',null,'veg',10,'Five potato smileys.'),
+  M('Potato Wedges — 100 g','CAT6',null,'veg',12,'Seasoned potato wedges.'),
+  M('Cheese Corn Nuggets','CAT6',null,'veg',12,'Cheese and corn nuggets.'),
+  // CATEGORY 7 — SNACKS NON-VEG
+  M('Hot Wings — 4 Pcs','CAT7',null,'nonveg',15,'Four spiced chicken wings.'),
+  M('BBQ Wings — 4 Pcs','CAT7',null,'nonveg',15,'Four barbecue chicken wings.'),
+  M('Chicken Nuggets — 5 Pcs','CAT7',null,'nonveg',12,'Five chicken nuggets.'),
+  M('Chicken Popcorn — 100 g','CAT7',null,'nonveg',12,'Bite-size fried chicken.'),
+  M('Chicken Strips — 3 Pcs','CAT7',null,'nonveg',14,'Three crumbed chicken strips.'),
+  M('Chicken Lollipop','CAT7',null,'nonveg',15,'Fried chicken lollipops.'),
+  // CATEGORY 8 — WRAPS
+  M('Veg Wrap','CAT8',null,'veg',12,'Vegetable filling in a soft wrap.'),
+  M('Chicken Wrap','CAT8',null,'nonveg',12,'Chicken filling in a soft wrap.'),
+  M('Peri Peri Chicken Wrap','CAT8',null,'nonveg',12,'Chicken wrap with peri peri spice.'),
+  M('BBQ Chicken Wrap','CAT8',null,'nonveg',12,'Chicken wrap with barbecue sauce.')
+];
+
+const SEED_ACCOUNTS = [
+  { user_id:'24CSE1234', name:'Arun Kumar',     role:'student', pw:'student123', department:'Computer Science', year:'II', email:'24cse1234@college.edu', phone:'98400 12345' },
+  { user_id:'24ECE0456', name:'Divya Ramesh',   role:'student', pw:'student123', department:'Electronics',      year:'II', email:'24ece0456@college.edu', phone:'98400 22456' },
+  { user_id:'FAC1025',   name:'Dr. S. Meena',   role:'teacher', pw:'teacher123', department:'Computer Science', year:'',   email:'meena.s@college.edu',   phone:'98400 71025' },
+  { user_id:'FAC1042',   name:'Prof. R. Karthik',role:'teacher', pw:'teacher123', department:'Architecture', year:'', email:'karthik.r@college.edu', phone:'98400 71042' },
+  { user_id:'CCSTAFF01', name:'Common Canteen Desk', role:'admin', pw:'admin123', department:'Common Canteen', year:'', email:'commoncanteen@college.edu', phone:'98400 90001' }
+];
+
+/* ---------------- state ---------------- */
+let DB = null;      // persisted
+let S = {           // session (not persisted beyond user id)
+  user:null, canteen:null, view:'home',
+  q:'', cat:'all', diet:'all', availOnly:false
+};
+
+async function boot(){
+  DB = LS.read();
+  if(!DB || DB.version !== 1){
+    const users = [];
+    for(const a of SEED_ACCOUNTS){
+      users.push({ user_id:a.user_id, name:a.name, email:a.email, phone:a.phone,
+        department:a.department, year:a.year, role:a.role,
+        password_hash: await sha256(a.pw), avatar:'' });
+    }
+    DB = {
+      version:1,
+      users,
+      canteens: CANTEENS.map(c=>({...c})),
+      categories: CATEGORIES.map(c=>({...c})),
+      foods: COMMON_MENU.map((f,i)=>({ food_id:'F'+String(i+1).padStart(3,'0'), canteen_id:'C3', ...f })),
+      orders:[], favorites:[], notifications:[], announcements:[
+        { announcement_id:'A1', canteen_id:'C3', title:'Counter timings', message:'The Chinese stall opens at 11:00 am on weekdays.', created_at:Date.now()-86400000 }
+      ],
+      seq: 1024, session:null
+    };
+    save();
+  }
+  // restore session
+  if(DB.session){
+    const u = DB.users.find(x=>x.user_id===DB.session);
+    if(u){ S.user = u; S.canteen = null; openApp(); return; }
+  }
+  renderDemoBox();
+}
+function save(){ LS.write(DB); }
+
+/* ---------------- helpers ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '₹'+Number(n).toLocaleString('en-IN');
+const catOf = id => DB.categories.find(c=>c.id===id) || {name:'Other',icon:'🍽️'};
+const canteenOf = id => DB.canteens.find(c=>c.id===id);
+const foodOf = id => DB.foods.find(f=>f.food_id===id);
+const now = () => Date.now();
+const fmtTime = t => new Date(t).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});
+const fmtDate = t => new Date(t).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+const roleLabel = r => r==='student'?'Student':r==='teacher'?'Teacher':'Canteen staff';
+
+function toast(msg, kind){
+  const el = document.createElement('div');
+  el.className = 'toast'+(kind?' '+kind:'');
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),320); }, 2600);
+}
+
+/* cart lives in the session only, per selected canteen */
+let CART = [];
+const cartCount = () => CART.reduce((n,l)=>n+l.qty,0);
+const cartTotal = () => CART.reduce((n,l)=>n + (foodOf(l.food_id).price||0)*l.qty, 0);
+
+const unreadCount = () => DB.notifications.filter(n=>n.user_id===S.user.user_id && !n.read_status).length;
+function notify(user_id, message){
+  DB.notifications.unshift({ notification_id:'N'+Math.random().toString(36).slice(2,9), user_id, message, read_status:false, created_at:now() });
+  save();
+}
+
+const STAGES = ['Order Placed','Order Accepted','Preparing','Ready','Picked Up'];
+
+/* ---------------- login ---------------- */
+let loginRole = 'student';
+const DEMO_TEXT = {
+  student:'Demo student: <b>24CSE1234</b> / <b>student123</b>',
+  teacher:'Demo teacher: <b>FAC1025</b> / <b>teacher123</b>',
+  admin:'Demo staff: <b>CCSTAFF01</b> / <b>admin123</b>'
+};
+function renderDemoBox(){ $('#demoBox').innerHTML = DEMO_TEXT[loginRole] + '<br>Accounts are stored in this browser only.'; }
+
+document.querySelectorAll('.seg button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    loginRole = b.dataset.role;
+    document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-selected', String(x===b)));
+    $('#loginTitle').textContent = loginRole==='student'?'Student sign in':loginRole==='teacher'?'Teacher sign in':'Canteen staff sign in';
+    $('#loginHint').textContent = loginRole==='student'?'Use the ID printed on your college card.'
+      : loginRole==='teacher'?'Use your faculty ID.' : 'Counter staff and canteen admins only.';
+    $('#idLabel').textContent = loginRole==='student'?'Student ID':loginRole==='teacher'?'Faculty ID':'Staff ID';
+    $('#loginId').placeholder = loginRole==='student'?'24CSE1234':loginRole==='teacher'?'FAC1025':'CCSTAFF01';
+    $('#loginErr').textContent=''; renderDemoBox();
+  });
+});
+
+$('#loginForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  const id = $('#loginId').value.trim().toUpperCase();
+  const pw = $('#loginPw').value;
+  const u = DB.users.find(x=>x.user_id.toUpperCase()===id);
+  const hash = await sha256(pw);
+  if(!u || u.password_hash !== hash){ $('#loginErr').textContent = 'That ID and password don’t match an account.'; return; }
+  if(u.role !== loginRole){ $('#loginErr').textContent = `That ID is registered as a ${roleLabel(u.role).toLowerCase()}. Switch tabs and try again.`; return; }
+  $('#loginErr').textContent=''; $('#loginPw').value='';
+  S.user = u; DB.session = u.user_id; save();
+  openApp();
+});
+
+function openApp(){
+  $('#landing').classList.add('hide');
+  $('#app').classList.remove('hide');
+  CART = [];
+  S.view = S.user.role==='admin' ? 'dashboard' : 'home';
+  S.canteen = null;
+  buildNav(); render();
+}
+function signOut(){
+  DB.session = null; save(); S.user=null; CART=[];
+  $('#app').classList.add('hide'); $('#tabbar').classList.add('hide');
+  $('#landing').classList.remove('hide');
+  $('#loginId').value=''; $('#loginErr').textContent='';
+}
+$('#logoutBtn').addEventListener('click', signOut);
+$('#mLogout').addEventListener('click', signOut);
+$('#mNotif').addEventListener('click', ()=>go('notifications'));
+
+/* ---------------- navigation ---------------- */
+const USER_NAV = [
+  ['home','Home','🏠'], ['menu','Menu','🍽️'], ['cart','Cart','🛒'],
+  ['orders','My orders','🧾'], ['favorites','Favorites','♥'],
+  ['notifications','Notifications','🔔'], ['profile','Profile','👤']
+];
+const ADMIN_NAV = [
+  ['dashboard','Dashboard','📊'], ['aorders','Orders','🧾'], ['amenu','Menu management','🍽️'],
+  ['acanteens','Canteens','🏫'], ['areports','Reports','📈'],
+  ['aannounce','Announcements','📣'], ['ausers','Users','👥'], ['asettings','Settings','⚙️']
+];
+const navItems = () => S.user.role==='admin' ? ADMIN_NAV : USER_NAV;
+
+function buildNav(){
+  const items = navItems();
+  $('#railNav').innerHTML = items.map(([k,l,i])=>
+    `<button data-go="${k}"><span class="ico">${i}</span>${esc(l)}<span class="pill hide" data-badge="${k}"></span></button>`).join('');
+  $('#railWho').innerHTML = `<b>${esc(S.user.name)}</b><span>${esc(S.user.user_id)} · ${roleLabel(S.user.role)}</span>`;
+  const tabs = S.user.role==='admin'
+    ? [['dashboard','Dashboard','📊'],['aorders','Orders','🧾'],['amenu','Menu','🍽️'],['areports','Reports','📈'],['aannounce','Notices','📣']]
+    : [['home','Home','🏠'],['menu','Menu','🍽️'],['cart','Cart','🛒'],['orders','Orders','🧾'],['profile','Profile','👤']];
+  $('#tabbar').innerHTML = tabs.map(([k,l,i])=>
+    `<button data-go="${k}"><span class="ico">${i}</span>${esc(l)}<span class="pill hide" data-badge="${k}"></span></button>`).join('');
+  $('#tabbar').classList.remove('hide');
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick = ()=>go(b.dataset.go));
+}
+function go(v){ S.view = v; window.scrollTo({top:0}); render(); }
+
+function syncNav(){
+  document.querySelectorAll('.nav button, .tabbar button').forEach(b=>{
+    if(b.dataset.go === S.view) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  const badges = { cart: cartCount(), notifications: unreadCount(), orders:0 };
+  if(S.user.role==='admin') badges.aorders = DB.orders.filter(o=>o.order_status==='Order Placed').length;
+  document.querySelectorAll('[data-badge]').forEach(p=>{
+    const n = badges[p.dataset.badge] || 0;
+    p.textContent = n; p.classList.toggle('hide', n===0);
+  });
+  const un = S.user.role==='admin' ? 0 : unreadCount();
+  $('#mNotif').textContent = un ? '🔔 '+un : '🔔';
+  $('#mNotif').classList.toggle('hide', S.user.role==='admin');
+}
+
+/* ---------------- router ---------------- */
+function render(){
+  const V = $('#view');
+  const r = {
+    home:viewHome, menu:viewMenu, cart:viewCart, checkout:viewCheckout,
+    orders:viewOrders, favorites:viewFavorites, notifications:viewNotifications, profile:viewProfile,
+    dashboard:viewDashboard, aorders:viewAdminOrders, amenu:viewAdminMenu, acanteens:viewAdminCanteens,
+    areports:viewReports, aannounce:viewAnnounce, ausers:viewUsers, asettings:viewSettings
+  }[S.view] || viewHome;
+  V.innerHTML = r();
+  syncNav();
+  wire();
+}
+function head(title, right){
+  return `<div class="topbar"><h2>${esc(title)}</h2><div class="spacer"></div>${right||''}</div>`;
+}
+
+/* ---------------- illustrated placeholders ----------------
+   No stock photos or invented dish photography — line-art icons
+   drawn per category, tinted by veg/non-veg. Honest placeholders,
+   not misleading pictures of specific plates. */
+const CAT_ART = {
+CAT1: `<svg viewBox="0 0 64 64"><path d="M14 30h36a1 1 0 0 1 1 1c0 10-8.5 18-19 18S13 41 13 31a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M20 30c0-6 4-11 12-11s12 5 12 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M27 17c-1-2-1-4 1-6M35 17c1-2 3-3 4-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/><circle cx="22" cy="37" r="1.6" fill="currentColor"/><circle cx="32" cy="41" r="1.6" fill="currentColor"/><circle cx="42" cy="37" r="1.6" fill="currentColor"/></svg>`,
+CAT2: `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="34" rx="21" ry="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M13 34c0 3 3 5 5 7 4 3 9 5 14 5s10-2 14-5c2-2 5-4 5-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M20 30c3-1 6-1.5 12-1.5s9 .5 12 1.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".55"/></svg>`,
+CAT3: `<svg viewBox="0 0 64 64"><path d="M15 29h34l-3 5H18l-3-5Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M17 34c-1 6 2 12 15 12s16-6 15-12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M23 29c0-6 2-10 2-13M32 29c0-7 1-11 1-14M41 29c0-6-1-10-1-13" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>`,
+CAT4: `<svg viewBox="0 0 64 64"><path d="M14 27c0-7 8-12 18-12s18 5 18 12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><rect x="13" y="27" width="38" height="5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15 36h34" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M13 42c0-2 1-3 3-3h32c2 0 3 1 3 3 0 3-3 6-19 6s-19-3-19-6Z" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>`,
+CAT5: `<svg viewBox="0 0 64 64"><path d="M27 14c6-2 12 1 14 7 3 8-1 15-7 22-4 4-6 9-4 13-5-1-8-5-8-10 0-4 2-7 4-10-6 1-11-2-13-8-3-8 3-13 14-14Z" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/><circle cx="24" cy="24" r="1.6" fill="currentColor"/><circle cx="32" cy="20" r="1.6" fill="currentColor"/></svg>`,
+CAT6: `<svg viewBox="0 0 64 64"><path d="M22 46 25 20a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2l1 26" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" fill="none"/><path d="M32 46 35 24a2 2 0 0 1 2-2 2 2 0 0 1 2 2l1 22" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" fill="none"/><path d="M42 46 44 28a1.8 1.8 0 0 1 1.8-1.8 1.8 1.8 0 0 1 1.8 1.8l1 18" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" fill="none"/><path d="M17 46h30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+CAT7: `<svg viewBox="0 0 64 64"><path d="M18 22c3-6 9-3 10 2 4-3 9 0 8 5-1 4-6 5-9 4 1 4-2 8-6 7-5-1-6-6-3-9-4-1-6-5-3-9 1-2 2-2 3 0Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M34 24c3-6 9-3 10 2 4-3 9 0 8 5-1 4-6 5-9 4 1 4-2 8-6 7-5-1-6-6-3-9-4-1-6-5-3-9 1-2 2-2 3 0Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" opacity=".6"/></svg>`,
+CAT8: `<svg viewBox="0 0 64 64"><path d="M25 16h14l6 34a2 2 0 0 1-2 2H21a2 2 0 0 1-2-2l6-34Z" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/><path d="M22 30c6 3 14 3 20 0M21 40c6 3 15 3 22 0" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".55"/><path d="M25 16c1-4 4-6 7-6s6 2 7 6" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>`
+};
+function thumb(food, big){
+  const c = catOf(food.category_id);
+  const tint = food.dietary_type==='veg' ? 'var(--leaf-soft)' : 'var(--chilli-soft)';
+  const ink  = food.dietary_type==='veg' ? 'var(--leaf)' : 'var(--chilli)';
+  const art = CAT_ART[food.category_id] || CAT_ART.CAT1;
+  return `<div class="${big?'hero-thumb':'thumb'}" style="background:${tint};color:${ink}">
+    <span class="art">${art}</span></div>`;
+}
+const priceTag = f => f.price==null
+  ? `<span class="price tbc">Price to be confirmed</span>`
+  : `<span class="price">${money(f.price)}</span>`;
+const dietTag = f => `<span class="tag ${f.dietary_type}"><i class="dot"></i>${f.dietary_type==='veg'?'Veg':'Non-veg'}</span>`;
+
+const isFav = fid => DB.favorites.some(f=>f.user_id===S.user.user_id && f.food_id===fid);
+
+function foodCard(f){
+  const orderable = f.availability && f.price!=null;
+  return `<article class="food">
+    <button class="fav" data-fav="${f.food_id}" aria-pressed="${isFav(f.food_id)}" aria-label="Save to favourites">♥</button>
+    <button style="all:unset;cursor:pointer;display:block" data-detail="${f.food_id}">
+      ${thumb(f)} ${f.availability?'':'<span class="soldout">Not available now</span>'}
+    </button>
+    <div class="body">
+      <h4>${esc(f.name)}</h4>
+      <div class="row">${dietTag(f)}<span class="prep">${f.preparation_time} min</span></div>
+      ${priceTag(f)}
+      <div class="acts">
+        <button class="btn sm" data-add="${f.food_id}" ${orderable?'':'disabled'}>${orderable?'Add to cart':(f.availability?'Price pending':'Unavailable')}</button>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ---------------- home / canteen selection ---------------- */
+function viewHome(){
+  const active = DB.orders.filter(o=>o.user_id===S.user.user_id && !['Picked Up','Cancelled'].includes(o.order_status));
+  const ann = DB.announcements.slice(0,2);
+  return head(`Hello, ${S.user.name.split(' ')[0]}`) +
+  `<p class="muted" style="margin-top:-.9rem;margin-bottom:1.4rem">${esc(S.user.user_id)} · ${roleLabel(S.user.role)}${S.user.department?' · '+esc(S.user.department):''}</p>
+  ${active.length ? `<div class="card" style="padding:1rem;margin-bottom:1.4rem">
+      <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
+        <h3 style="font-size:1.02rem">Order in progress</h3><span class="status">${esc(active[0].order_status)}</span></div>
+      <p class="muted" style="margin:0 0 .7rem;font-size:.88rem">${esc(active[0].order_id)} · ${esc(canteenOf(active[0].canteen_id).name)} · ${money(active[0].total_amount)}</p>
+      <button class="btn sm" data-track="${active[0].order_id}">Track this order</button></div>`:''}
+  <h3 style="font-size:1.06rem;margin-bottom:.15rem">Choose a canteen</h3>
+  <p class="muted" style="font-size:.88rem;margin:0 0 .9rem">Each canteen keeps its own menu and its own orders.</p>
+  <div class="canteen-grid">
+    ${DB.canteens.map(c=>{
+      const n = DB.foods.filter(f=>f.canteen_id===c.id).length;
+      return `<button class="canteen-card" data-pick="${c.id}">
+        <h3>${esc(c.name)}</h3>
+        <span class="meta">${esc(c.location)} · ${esc(c.open)}–${esc(c.close)}</span>
+        <span class="state ${n?'live':'soon'}">${n? n+' items on the menu' : 'Menu will be available soon'}</span>
+      </button>`;}).join('')}
+  </div>
+  ${ann.length?`<h3 style="font-size:1.06rem;margin:1.8rem 0 .6rem">Canteen notices</h3>
+  <div class="card" style="padding:.3rem 1rem">${ann.map(a=>`<div class="row-item"><div class="grow">
+    <h4>${esc(a.title)}</h4><div class="sub">${esc(a.message)}</div>
+    <div class="sub">${esc(canteenOf(a.canteen_id)?.name||'All canteens')} · ${fmtDate(a.created_at)}</div></div></div>`).join('')}</div>`:''}`;
+}
+
+/* ---------------- menu ---------------- */
+function viewMenu(){
+  if(!S.canteen) return head('Menu') + `<div class="empty"><div class="big">🏫</div><h3>Pick a canteen first</h3>
+    <p>Menus, prices and availability are set per canteen.</p><button class="btn" data-go="home">Choose a canteen</button></div>`;
+  const c = canteenOf(S.canteen);
+  const all = DB.foods.filter(f=>f.canteen_id===c.id);
+  const ctx = `<div class="ctx"><span>${esc(c.name)}</span><span class="hrs">${esc(c.open)}–${esc(c.close)}</span>
+    <button class="btn ghost sm" data-go="home" style="margin-left:auto">Change canteen</button></div>`;
+
+  if(!all.length) return head('Menu') + ctx + `<div class="empty"><div class="big">🕒</div>
+    <h3>Menu will be available soon</h3><p>This canteen is set up in the system. Its items and prices will appear once the canteen shares them.</p>
+    <button class="btn ghost" data-go="home">Pick another canteen</button></div>`;
+
+  const q = S.q.trim().toLowerCase();
+  let list = all.filter(f=>{
+    if(q && !(f.name.toLowerCase().includes(q) || catOf(f.category_id).name.toLowerCase().includes(q) || f.description.toLowerCase().includes(q))) return false;
+    if(S.cat!=='all' && f.category_id!==S.cat) return false;
+    if(S.diet!=='all' && f.dietary_type!==S.diet) return false;
+    if(S.availOnly && !f.availability) return false;
+    return true;
+  });
+  const cats = DB.categories.filter(cat=>all.some(f=>f.category_id===cat.id));
+  const toolbar = `<div class="toolbar">
+      <div class="search"><span class="mag">⌕</span>
+        <input class="input" id="q" placeholder="Search fried rice, dosai, burger…" value="${esc(S.q)}"></div>
+      <button class="chip" data-diet="veg" aria-pressed="${S.diet==='veg'}">Veg</button>
+      <button class="chip" data-diet="nonveg" aria-pressed="${S.diet==='nonveg'}">Non-veg</button>
+      <button class="chip" data-avail aria-pressed="${S.availOnly}">Available now</button>
+    </div>
+    <div class="chips">
+      <button class="chip" data-cat="all" aria-pressed="${S.cat==='all'}">All ${all.length}</button>
+      ${cats.map(cat=>`<button class="chip" data-cat="${cat.id}" aria-pressed="${S.cat===cat.id}">${cat.icon} ${esc(cat.name)}</button>`).join('')}
+    </div>`;
+
+  let body;
+  if(!list.length){
+    body = `<div class="empty"><div class="big">🔍</div><h3>Nothing matched</h3>
+      <p>Try a shorter word, or clear the filters.</p><button class="btn ghost" data-clear>Clear filters</button></div>`;
+  } else {
+    const groups = cats.filter(cat=>list.some(f=>f.category_id===cat.id));
+    body = groups.map(cat=>{
+      const items = list.filter(f=>f.category_id===cat.id);
+      return `<div class="cat-head"><h3>${cat.icon} ${esc(cat.name)}</h3><span>${items.length} items</span></div>
+        <div class="food-grid">${items.map(foodCard).join('')}</div>`;
+    }).join('');
+  }
+  return head('Menu', `<button class="btn ghost sm" data-go="cart">Cart · ${cartCount()}</button>`) + ctx + toolbar + body;
+}
+
+/* ---------------- food details ---------------- */
+function openDetail(fid){
+  const f = foodOf(fid);
+  const orderable = f.availability && f.price!=null;
+  modal(`<div class="sheet">
+    <header><h3>${esc(f.name)}</h3><button class="x" data-close>×</button></header>
+    ${thumb(f,true)}
+    <div class="pad">
+      <div class="row" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem">
+        ${dietTag(f)}<span class="tag">${catOf(f.category_id).name}</span>
+        <span class="tag">${f.preparation_time} min to prepare</span>
+        <span class="tag" style="${f.availability?'':'background:var(--chilli-soft);color:var(--chilli)'}">${f.availability?'Available':'Not available now'}</span>
+      </div>
+      <div style="font-family:var(--disp);font-weight:800;font-size:1.5rem;margin-bottom:.4rem">
+        ${f.price==null?'<span class="price tbc" style="font-size:.9rem">Price to be confirmed</span>':money(f.price)}</div>
+      <p class="muted" style="margin:0 0 1.1rem">${esc(f.description||'No description added yet.')}</p>
+      ${orderable?`<div style="display:flex;gap:.7rem;align-items:center">
+        <div class="qty"><button data-q="-1">−</button><span id="dq">1</span><button data-q="1">+</button></div>
+        <button class="btn" style="flex:1" data-addq="${f.food_id}">Add to cart</button></div>`
+        :`<p class="muted" style="font-size:.88rem">${f.availability?'The canteen has not confirmed a price for this item yet, so it can’t be ordered from the app.':'This item is switched off by the canteen right now.'}</p>`}
+      <button class="btn ghost sm block" style="margin-top:.7rem" data-fav="${f.food_id}">${isFav(f.food_id)?'Remove from favourites':'Save to favourites'}</button>
+    </div></div>`);
+}
+
+/* ---------------- cart ---------------- */
+function addToCart(fid, qty){
+  const f = foodOf(fid);
+  if(!f.availability || f.price==null) return;
+  if(S.cartCanteen && S.cartCanteen !== f.canteen_id && CART.length){
+    if(!confirm('Your cart has items from another canteen. Start a new cart for this canteen?')) return;
+    CART = [];
+  }
+  S.cartCanteen = f.canteen_id;
+  const line = CART.find(l=>l.food_id===fid);
+  if(line) line.qty += qty; else CART.push({food_id:fid, qty});
+  toast(`${f.name} added`, 'good');
+  syncNav();
+}
+function viewCart(){
+  if(!CART.length) return head('Cart') + `<div class="empty"><div class="big">🛒</div><h3>Your cart is empty</h3>
+    <p>Add something from the menu and it will show up here.</p><button class="btn" data-go="menu">Browse the menu</button></div>`;
+  const c = canteenOf(S.cartCanteen);
+  return head('Cart') + `<div class="ctx"><span>${esc(c.name)}</span><span class="hrs">Pickup at the counter</span></div>
+  <div class="two-col">
+    <div class="card" style="padding:.3rem 1rem">
+      ${CART.map(l=>{ const f=foodOf(l.food_id); return `<div class="row-item">
+        <div class="mini">${catOf(f.category_id).icon}</div>
+        <div class="grow"><h4>${esc(f.name)}</h4><div class="sub">${money(f.price)} each · ${f.preparation_time} min</div></div>
+        <div class="qty"><button data-cq="${f.food_id}:-1">−</button><span>${l.qty}</span><button data-cq="${f.food_id}:1">+</button></div>
+        <div style="font-weight:700;min-width:4.2rem;text-align:right">${money(f.price*l.qty)}</div>
+        <button class="x" data-rm="${f.food_id}" aria-label="Remove">×</button></div>`;}).join('')}
+    </div>
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.6rem">Order summary</h3>
+      <div class="total"><span>Items (${cartCount()})</span><span>${money(cartTotal())}</span></div>
+      <div class="total grand"><span>Total</span><span>${money(cartTotal())}</span></div>
+      <label class="field" style="margin-top:.9rem"><span>Special instructions (optional)</span>
+        <textarea class="input" id="notes" rows="3" placeholder="Less spicy, no onion…">${esc(S.notes||'')}</textarea></label>
+      <button class="btn block" data-go="checkout">Proceed to checkout</button>
+      <button class="btn ghost sm block" style="margin-top:.5rem" data-go="menu">Add more items</button>
+    </div>
+  </div>`;
+}
+
+/* ---------------- checkout ---------------- */
+function viewCheckout(){
+  if(!CART.length){ S.view='cart'; return viewCart(); }
+  const c = canteenOf(S.cartCanteen);
+  const prep = Math.max(...CART.map(l=>foodOf(l.food_id).preparation_time));
+  const slots = [];
+  for(let i=0;i<5;i++){ const t = new Date(now() + (prep + i*10)*60000); slots.push(t); }
+  return head('Checkout') + `<div class="two-col">
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.7rem">Pickup details</h3>
+      <div class="total"><span>Name</span><b>${esc(S.user.name)}</b></div>
+      <div class="total"><span>User ID</span><b>${esc(S.user.user_id)}</b></div>
+      <div class="total"><span>User type</span><b>${roleLabel(S.user.role)}</b></div>
+      <div class="total"><span>Canteen</span><b>${esc(c.name)}</b></div>
+      <label class="field" style="margin-top:1rem"><span>Pickup time</span>
+        <select class="input" id="slot">
+          <option value="asap">As soon as it’s ready (about ${prep} min)</option>
+          ${slots.map(t=>`<option value="${t.getTime()}">${fmtTime(t)}</option>`).join('')}
+        </select></label>
+      <span class="field"><span>Payment method</span></span>
+      <div style="display:grid;gap:.5rem">
+        <label class="card" style="padding:.7rem .8rem;display:flex;gap:.6rem;align-items:center;cursor:pointer">
+          <input type="radio" name="pay" value="UPI / Online Payment" checked>
+          <span><b>UPI / online payment</b><br><span class="muted" style="font-size:.84rem">Pay now, show the order ID at the counter.</span></span></label>
+        <label class="card" style="padding:.7rem .8rem;display:flex;gap:.6rem;align-items:center;cursor:pointer">
+          <input type="radio" name="pay" value="Cash at Counter">
+          <span><b>Cash at counter</b><br><span class="muted" style="font-size:.84rem">Pay when you collect the order.</span></span></label>
+      </div>
+    </div>
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.5rem">Your order</h3>
+      ${CART.map(l=>{const f=foodOf(l.food_id); return `<div class="total"><span>${esc(f.name)} × ${l.qty}</span><span>${money(f.price*l.qty)}</span></div>`;}).join('')}
+      <div class="total grand"><span>Total</span><span>${money(cartTotal())}</span></div>
+      ${S.notes?`<p class="muted" style="font-size:.86rem;margin-top:.6rem">Note: ${esc(S.notes)}</p>`:''}
+      <button class="btn block" style="margin-top:.9rem" id="placeOrder">Place order</button>
+      <button class="btn ghost sm block" style="margin-top:.5rem" data-go="cart">Back to cart</button>
+    </div></div>`;
+}
+
+function placeOrder(){
+  const pay = document.querySelector('input[name=pay]:checked').value;
+  const slotEl = $('#slot'); const slot = slotEl.value;
+  DB.seq += 1;
+  const id = 'CC-' + new Date().getFullYear() + '-' + String(DB.seq).padStart(6,'0');
+  const order = {
+    order_id:id, user_id:S.user.user_id, canteen_id:S.cartCanteen, order_time:now(),
+    total_amount:cartTotal(), payment_method:pay, order_status:'Order Placed',
+    pickup: slot==='asap' ? null : Number(slot), notes:S.notes||'',
+    items: CART.map(l=>({ food_id:l.food_id, name:foodOf(l.food_id).name, quantity:l.qty, price:foodOf(l.food_id).price })),
+    history:[{stage:'Order Placed', at:now()}]
+  };
+  DB.orders.unshift(order);
+  notify(S.user.user_id, `Order ${id} placed at ${canteenOf(order.canteen_id).name}.`);
+  save();
+  CART = []; S.notes=''; S.cartCanteen=null;
+  toast('Order placed · '+id, 'good');
+  S.view='orders'; render();
+  openTrack(id);
+}
+
+/* ---------------- orders + tracking ---------------- */
+function statusClass(s){ return s==='Cancelled'?'bad' : s==='Picked Up'?'done' : s==='Ready'?'':'warn'; }
+function viewOrders(){
+  const mine = DB.orders.filter(o=>o.user_id===S.user.user_id);
+  if(!mine.length) return head('My orders') + `<div class="empty"><div class="big">🧾</div><h3>No orders yet</h3>
+    <p>Once you place an order it stays here with its ID, items and total.</p><button class="btn" data-go="menu">Browse the menu</button></div>`;
+  return head('My orders') + `<div class="card" style="padding:.3rem 1rem">
+    ${mine.map(o=>`<div class="row-item">
+      <div class="mini">${o.order_status==='Cancelled'?'✕':o.order_status==='Picked Up'?'✓':'●'}</div>
+      <div class="grow">
+        <h4>${esc(o.order_id)} <span class="status ${statusClass(o.order_status)}">${esc(o.order_status)}</span></h4>
+        <div class="sub">${esc(canteenOf(o.canteen_id).name)} · ${fmtDate(o.order_time)}, ${fmtTime(o.order_time)}</div>
+        <div class="sub">${o.items.map(i=>esc(i.name)+' × '+i.quantity).join(', ')}</div>
+        <div class="sub">${money(o.total_amount)} · ${esc(o.payment_method)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.35rem">
+        <button class="btn ghost sm" data-track="${o.order_id}">Track</button>
+        <button class="btn quiet sm" data-reorder="${o.order_id}">Reorder</button>
+      </div></div>`).join('')}</div>`;
+}
+
+function openTrack(oid){
+  const o = DB.orders.find(x=>x.order_id===oid);
+  if(!o) return;
+  const idx = o.order_status==='Cancelled' ? -1 : STAGES.indexOf(o.order_status);
+  modal(`<div class="sheet"><header><h3>${esc(o.order_id)}</h3><button class="x" data-close>×</button></header>
+  <div class="pad">
+    <p class="muted" style="margin:0 0 1rem">${esc(canteenOf(o.canteen_id).name)} · ${fmtDate(o.order_time)}, ${fmtTime(o.order_time)}</p>
+    ${o.order_status==='Cancelled'
+      ? `<div class="card" style="padding:.9rem;background:var(--chilli-soft);border-color:transparent;color:var(--chilli);font-weight:600">This order was cancelled by the canteen.</div>`
+      : `<ul class="track">${STAGES.map((s,i)=>{
+          const h = o.history.find(x=>x.stage===s);
+          const cls = i<idx?'done':i===idx?'now':'';
+          return `<li class="${cls}"><span class="bead">✓</span><div><div class="lab">${s}</div>
+            ${h?`<div class="at">${fmtTime(h.at)}</div>`:''}</div></li>`;}).join('')}</ul>`}
+    <h4 style="margin:1.3rem 0 .3rem;font-size:1rem">Items</h4>
+    ${o.items.map(i=>`<div class="total"><span>${esc(i.name)} × ${i.quantity}</span><span>${money(i.price*i.quantity)}</span></div>`).join('')}
+    <div class="total grand"><span>Total</span><span>${money(o.total_amount)}</span></div>
+    <div class="total"><span>Payment</span><b>${esc(o.payment_method)}</b></div>
+    <div class="total"><span>Pickup</span><b>${o.pickup?fmtTime(o.pickup):'As soon as ready'}</b></div>
+    ${o.notes?`<p class="muted" style="font-size:.87rem;margin-top:.5rem">Note: ${esc(o.notes)}</p>`:''}
+    <button class="btn ghost block" style="margin-top:1rem" data-close>Close</button>
+  </div></div>`);
+}
+function reorder(oid){
+  const o = DB.orders.find(x=>x.order_id===oid);
+  CART = []; S.cartCanteen = o.canteen_id;
+  let skipped = 0;
+  o.items.forEach(i=>{ const f=foodOf(i.food_id);
+    if(f && f.availability && f.price!=null) CART.push({food_id:i.food_id, qty:i.quantity}); else skipped++; });
+  if(!CART.length){ toast('Those items aren’t orderable right now','bad'); return; }
+  toast(skipped?`Added, ${skipped} item(s) unavailable`:'Items added to cart','good');
+  go('cart');
+}
+
+/* ---------------- favorites ---------------- */
+function toggleFav(fid){
+  const i = DB.favorites.findIndex(f=>f.user_id===S.user.user_id && f.food_id===fid);
+  if(i>-1){ DB.favorites.splice(i,1); toast('Removed from favourites'); }
+  else { DB.favorites.push({user_id:S.user.user_id, food_id:fid}); toast('Saved to favourites','good'); }
+  save();
+}
+function viewFavorites(){
+  const list = DB.favorites.filter(f=>f.user_id===S.user.user_id).map(f=>foodOf(f.food_id)).filter(Boolean);
+  if(!list.length) return head('Favorites') + `<div class="empty"><div class="big">♥</div><h3>No favourites saved</h3>
+    <p>Tap the heart on any item to keep it here for quick reordering.</p><button class="btn" data-go="menu">Browse the menu</button></div>`;
+  return head('Favorites') + `<div class="food-grid">${list.map(foodCard).join('')}</div>`;
+}
+
+/* ---------------- notifications ---------------- */
+function viewNotifications(){
+  const mine = DB.notifications.filter(n=>n.user_id===S.user.user_id);
+  setTimeout(()=>{ mine.forEach(n=>n.read_status=true); save(); syncNav(); }, 400);
+  const anns = DB.announcements;
+  return head('Notifications') +
+    (mine.length ? `<div class="card" style="padding:.3rem 1rem;margin-bottom:1.3rem">
+      ${mine.map(n=>`<div class="row-item"><div class="mini">${n.read_status?'🔔':'🔴'}</div>
+        <div class="grow"><h4 style="font-weight:${n.read_status?600:700}">${esc(n.message)}</h4>
+        <div class="sub">${fmtDate(n.created_at)}, ${fmtTime(n.created_at)}</div></div></div>`).join('')}</div>`
+      : `<div class="empty"><div class="big">🔔</div><h3>Nothing new</h3><p>Updates about your orders appear here.</p></div>`) +
+    `<h3 style="font-size:1.05rem;margin-bottom:.6rem">Canteen announcements</h3>
+     <div class="card" style="padding:.3rem 1rem">${anns.length?anns.map(a=>`<div class="row-item"><div class="grow">
+       <h4>${esc(a.title)}</h4><div class="sub">${esc(a.message)}</div>
+       <div class="sub">${esc(canteenOf(a.canteen_id)?.name||'All canteens')} · ${fmtDate(a.created_at)}</div></div></div>`).join('')
+       :'<p class="muted" style="padding:.9rem 0">No announcements right now.</p>'}</div>`;
+}
+
+/* ---------------- profile ---------------- */
+function viewProfile(){
+  const u = S.user;
+  const initials = u.name.split(' ').map(w=>w[0]).slice(0,2).join('');
+  return head('Profile') + `<div class="two-col">
+    <div class="card" style="padding:1.1rem">
+      <div style="display:flex;gap:.9rem;align-items:center;margin-bottom:1rem">
+        <div style="width:58px;height:58px;border-radius:50%;background:var(--leaf);color:#fff;display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:1.25rem">${esc(initials)}</div>
+        <div><b style="font-size:1.08rem">${esc(u.name)}</b><div class="muted" style="font-size:.88rem">${esc(u.user_id)} · ${roleLabel(u.role)}</div></div>
+      </div>
+      <form id="profForm">
+        <label class="field"><span>Name</span><input class="input" name="name" value="${esc(u.name)}" required></label>
+        <label class="field"><span>${u.role==='student'?'Student ID':'Faculty ID'}</span><input class="input" value="${esc(u.user_id)}" disabled></label>
+        <label class="field"><span>Department</span><input class="input" name="department" value="${esc(u.department)}"></label>
+        ${u.role==='student'?`<label class="field"><span>Year</span><input class="input" name="year" value="${esc(u.year)}"></label>`:''}
+        <label class="field"><span>Email</span><input class="input" type="email" name="email" value="${esc(u.email)}"></label>
+        <label class="field"><span>Phone number</span><input class="input" name="phone" value="${esc(u.phone)}"></label>
+        <button class="btn">Save changes</button>
+      </form>
+    </div>
+    <div class="card" style="padding:1.1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.7rem">Change password</h3>
+      <form id="pwForm">
+        <label class="field"><span>Current password</span><input class="input" type="password" name="old" required></label>
+        <label class="field"><span>New password</span><input class="input" type="password" name="new" minlength="6" required></label>
+        <label class="field"><span>Confirm new password</span><input class="input" type="password" name="confirm" minlength="6" required></label>
+        <p class="err" id="pwErr"></p>
+        <button class="btn">Update password</button>
+      </form>
+      <p class="muted" style="font-size:.82rem;margin-top:1rem;border-top:1px solid var(--line-2);padding-top:.8rem">
+        Passwords are stored as SHA-256 hashes. The plain password is never written to storage.</p>
+    </div></div>`;
+}
+
+/* ================= ADMIN ================= */
+function viewDashboard(){
+  const o = DB.orders;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todays = o.filter(x=>x.order_time>=today.getTime());
+  const count = s => o.filter(x=>x.order_status===s).length;
+  const revenue = todays.filter(x=>x.order_status!=='Cancelled').reduce((n,x)=>n+x.total_amount,0);
+  const pending = o.filter(x=>x.order_status==='Order Placed');
+  return head('Dashboard') + `<div class="stats">
+    <div class="stat"><div class="n">${count('Order Placed')}</div><div class="l">Pending</div></div>
+    <div class="stat"><div class="n">${count('Order Accepted')}</div><div class="l">Accepted</div></div>
+    <div class="stat"><div class="n">${count('Preparing')}</div><div class="l">Preparing</div></div>
+    <div class="stat"><div class="n">${count('Ready')}</div><div class="l">Ready</div></div>
+    <div class="stat"><div class="n">${count('Picked Up')}</div><div class="l">Completed</div></div>
+    <div class="stat"><div class="n">${count('Cancelled')}</div><div class="l">Cancelled</div></div>
+  </div>
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+    <div class="stat"><div class="n">${todays.length}</div><div class="l">Orders today</div></div>
+    <div class="stat"><div class="n">${money(revenue)}</div><div class="l">Revenue today</div></div>
+    <div class="stat"><div class="n">${DB.foods.filter(f=>f.price==null).length}</div><div class="l">Prices to confirm</div></div>
+  </div>
+  <h3 style="font-size:1.05rem;margin:1.6rem 0 .6rem">New orders waiting</h3>
+  ${pending.length ? `<div class="card" style="padding:.3rem 1rem">${pending.map(orderRow).join('')}</div>`
+    : `<div class="card" style="padding:1.4rem;text-align:center"><span class="muted">No orders waiting. New orders land here as students place them.</span></div>`}`;
+}
+
+function orderRow(o){
+  const u = DB.users.find(x=>x.user_id===o.user_id);
+  const si = STAGES.indexOf(o.order_status);
+  const next = si>-1 ? STAGES[si+1] : null;
+  return `<div class="row-item">
+    <div class="grow">
+      <h4>${esc(o.order_id)} <span class="status ${statusClass(o.order_status)}">${esc(o.order_status)}</span></h4>
+      <div class="sub">${esc(o.user_id)} · ${roleLabel(u?u.role:'student')} · ${esc(canteenOf(o.canteen_id).name)}</div>
+      <div class="sub">${o.items.map(i=>esc(i.name)+' × '+i.quantity).join(', ')}</div>
+      <div class="sub">${money(o.total_amount)} · ${esc(o.payment_method)} · ${fmtTime(o.order_time)}${o.notes?' · Note: '+esc(o.notes):''}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.35rem">
+      ${next?`<button class="btn sm" data-adv="${o.order_id}">Mark ${next.replace('Order ','').toLowerCase()}</button>`:''}
+      ${['Picked Up','Cancelled'].includes(o.order_status)?'':`<button class="btn danger sm" data-cancel="${o.order_id}">Cancel</button>`}
+    </div></div>`;
+}
+
+function viewAdminOrders(){
+  const f = S.ofilter||'all';
+  const list = f==='all' ? DB.orders : DB.orders.filter(o=>o.order_status===f);
+  const tabs = ['all',...STAGES,'Cancelled'];
+  return head('Orders') + `<div class="chips">${tabs.map(t=>
+    `<button class="chip" data-of="${t}" aria-pressed="${f===t}">${t==='all'?'All':t}</button>`).join('')}</div>
+    ${list.length?`<div class="card" style="padding:.3rem 1rem">${list.map(orderRow).join('')}</div>`
+      :`<div class="empty"><div class="big">🧾</div><h3>Nothing here</h3><p>No orders with this status yet.</p></div>`}`;
+}
+
+function advance(oid){
+  const o = DB.orders.find(x=>x.order_id===oid);
+  const i = STAGES.indexOf(o.order_status);
+  if(i<0 || i>=STAGES.length-1) return;
+  o.order_status = STAGES[i+1];
+  o.history.push({stage:o.order_status, at:now()});
+  const msgs = {
+    'Order Accepted':`Order ${oid} was accepted by the canteen.`,
+    'Preparing':`Order ${oid} is being prepared.`,
+    'Ready':`Order ${oid} is ready. Please collect it at the counter.`,
+    'Picked Up':`Order ${oid} was collected. Thanks!`
+  };
+  notify(o.user_id, msgs[o.order_status]);
+  save(); render(); toast(`${oid} → ${o.order_status}`,'good');
+}
+function cancelOrder(oid){
+  const o = DB.orders.find(x=>x.order_id===oid);
+  if(!confirm(`Cancel ${oid}? The student will be notified.`)) return;
+  o.order_status='Cancelled'; o.history.push({stage:'Cancelled', at:now()});
+  notify(o.user_id, `Order ${oid} was cancelled by the canteen.`);
+  save(); render(); toast(oid+' cancelled','bad');
+}
+
+/* ---------------- menu management ---------------- */
+function viewAdminMenu(){
+  const cid = S.mcanteen || 'C3';
+  const list = DB.foods.filter(f=>f.canteen_id===cid)
+    .filter(f=>!S.mq || f.name.toLowerCase().includes(S.mq.toLowerCase()));
+  return head('Menu management', `<button class="btn sm" data-newfood>Add food item</button>`) +
+  `<div class="toolbar">
+    <select class="input" id="mcanteen" style="max-width:260px">
+      ${DB.canteens.map(c=>`<option value="${c.id}" ${cid===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}
+    </select>
+    <div class="search"><span class="mag">⌕</span><input class="input" id="mq" placeholder="Find an item" value="${esc(S.mq||'')}"></div>
+  </div>
+  ${list.length?`<div class="scroll-x"><table>
+    <thead><tr><th>Item</th><th>Category</th><th>Type</th><th>Price</th><th>Prep</th><th>Available</th><th></th></tr></thead>
+    <tbody>${list.map(f=>`<tr>
+      <td><b>${esc(f.name)}</b><br><span class="muted" style="font-size:.8rem">${esc(f.food_id)}</span></td>
+      <td>${esc(catOf(f.category_id).name)}</td>
+      <td><span class="tag ${f.dietary_type}"><i class="dot"></i>${f.dietary_type==='veg'?'Veg':'Non-veg'}</span></td>
+      <td>${f.price==null?'<span class="status warn">To confirm</span>':money(f.price)}</td>
+      <td>${f.preparation_time} min</td>
+      <td><button class="btn ${f.availability?'quiet':'ghost'} sm" data-avail-toggle="${f.food_id}">${f.availability?'On':'Off'}</button></td>
+      <td style="white-space:nowrap"><button class="btn ghost sm" data-edit="${f.food_id}">Edit</button>
+        <button class="btn danger sm" data-del="${f.food_id}">Delete</button></td>
+    </tr>`).join('')}</tbody></table></div>`
+  :`<div class="empty"><div class="big">🍽️</div><h3>No items for this canteen yet</h3>
+     <p>Students see “Menu will be available soon” until you add the first item.</p>
+     <button class="btn" data-newfood>Add the first item</button></div>`}`;
+}
+
+function foodForm(f){
+  const isNew = !f;
+  f = f || { food_id:'', canteen_id:S.mcanteen||'C3', category_id:'CAT1', name:'', description:'',
+             price:null, dietary_type:'veg', preparation_time:10, availability:true };
+  modal(`<div class="sheet"><header><h3>${isNew?'Add food item':'Edit '+esc(f.name)}</h3><button class="x" data-close>×</button></header>
+  <form class="pad" id="foodForm" data-id="${esc(f.food_id)}">
+    <label class="field"><span>Name</span><input class="input" name="name" value="${esc(f.name)}" required></label>
+    <label class="field"><span>Description</span><textarea class="input" name="description" rows="2">${esc(f.description)}</textarea></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+      <label class="field"><span>Canteen</span><select class="input" name="canteen_id">
+        ${DB.canteens.map(c=>`<option value="${c.id}" ${f.canteen_id===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+      <label class="field"><span>Category</span><select class="input" name="category_id">
+        ${DB.categories.map(c=>`<option value="${c.id}" ${f.category_id===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+      <label class="field"><span>Price (₹) — leave blank to keep “to be confirmed”</span>
+        <input class="input" name="price" type="number" min="0" step="1" value="${f.price==null?'':f.price}"></label>
+      <label class="field"><span>Preparation time (min)</span>
+        <input class="input" name="preparation_time" type="number" min="1" max="120" value="${f.preparation_time}"></label>
+      <label class="field"><span>Type</span><select class="input" name="dietary_type">
+        <option value="veg" ${f.dietary_type==='veg'?'selected':''}>Veg</option>
+        <option value="nonveg" ${f.dietary_type==='nonveg'?'selected':''}>Non-veg</option></select></label>
+      <label class="field"><span>Availability</span><select class="input" name="availability">
+        <option value="1" ${f.availability?'selected':''}>Available</option>
+        <option value="0" ${f.availability?'':'selected'}>Not available</option></select></label>
+    </div>
+    <label class="field"><span>Food image</span><input class="input" type="file" name="image" accept="image/*" disabled>
+      <span class="muted" style="font-size:.8rem">Image upload is wired to the food_id field; until a photo is uploaded the app shows a category placeholder instead of a misleading picture.</span></label>
+    <button class="btn block">${isNew?'Add item':'Save changes'}</button>
+  </form></div>`);
+}
+
+/* ---------------- canteens ---------------- */
+function viewAdminCanteens(){
+  return head('Canteens') + `<p class="muted" style="margin-top:-.9rem;margin-bottom:1.2rem">
+    Every food item and every order is linked to a canteen ID, so a new canteen menu can be filled in without touching the rest of the app.</p>
+  <div class="scroll-x"><table><thead><tr><th>Canteen</th><th>ID</th><th>Location</th><th>Opens</th><th>Closes</th><th>Menu items</th></tr></thead>
+    <tbody>${DB.canteens.map(c=>{const n=DB.foods.filter(f=>f.canteen_id===c.id).length; return `<tr>
+      <td><b>${esc(c.name)}</b></td><td>${esc(c.id)}</td>
+      <td><input class="input" data-cfield="${c.id}:location" value="${esc(c.location)}"></td>
+      <td><input class="input" type="time" data-cfield="${c.id}:open" value="${esc(c.open)}"></td>
+      <td><input class="input" type="time" data-cfield="${c.id}:close" value="${esc(c.close)}"></td>
+      <td>${n?n:'<span class="status warn">Menu soon</span>'}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+
+/* ---------------- reports ---------------- */
+function viewReports(){
+  const done = DB.orders.filter(o=>o.order_status!=='Cancelled');
+  const day = 86400000; const t0 = new Date(); t0.setHours(0,0,0,0);
+  const inRange = ms => done.filter(o=>o.order_time>=now()-ms);
+  const rev = arr => arr.reduce((n,o)=>n+o.total_amount,0);
+  const daily = done.filter(o=>o.order_time>=t0.getTime());
+  const weekly = inRange(7*day), monthly = inRange(30*day);
+
+  // most ordered
+  const tally = {};
+  done.forEach(o=>o.items.forEach(i=>{ tally[i.name]=(tally[i.name]||0)+i.quantity; }));
+  const top = Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const max = top.length?top[0][1]:1;
+
+  const byCanteen = DB.canteens.map(c=>({c, n:done.filter(o=>o.canteen_id===c.id).length,
+    r:rev(done.filter(o=>o.canteen_id===c.id))}));
+
+  return head('Reports') + `<div class="stats">
+    <div class="stat"><div class="n">${daily.length}</div><div class="l">Orders today</div></div>
+    <div class="stat"><div class="n">${weekly.length}</div><div class="l">Last 7 days</div></div>
+    <div class="stat"><div class="n">${monthly.length}</div><div class="l">Last 30 days</div></div>
+    <div class="stat"><div class="n">${money(rev(daily))}</div><div class="l">Revenue today</div></div>
+    <div class="stat"><div class="n">${money(rev(monthly))}</div><div class="l">Revenue, 30 days</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.4rem">Most ordered food</h3>
+      ${top.length?`<div class="bars">${top.map(([n,q])=>`<div class="b">
+        <em>${q}</em><i style="height:${Math.max(4,(q/max)*100)}%"></i><small>${esc(n.split(' ').slice(0,2).join(' '))}</small></div>`).join('')}</div>`
+        :'<p class="muted">No completed orders yet, so there is nothing to rank.</p>'}
+    </div>
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.4rem">Orders by canteen</h3>
+      <div class="scroll-x"><table><thead><tr><th>Canteen</th><th>Orders</th><th>Revenue</th></tr></thead>
+        <tbody>${byCanteen.map(x=>`<tr><td>${esc(x.c.name)}</td><td>${x.n}</td><td>${money(x.r)}</td></tr>`).join('')}</tbody></table></div>
+    </div></div>`;
+}
+
+/* ---------------- announcements ---------------- */
+function viewAnnounce(){
+  return head('Announcements') + `<div class="two-col">
+    <div class="card" style="padding:.3rem 1rem">
+      ${DB.announcements.length?DB.announcements.map(a=>`<div class="row-item"><div class="grow">
+        <h4>${esc(a.title)}</h4><div class="sub">${esc(a.message)}</div>
+        <div class="sub">${esc(canteenOf(a.canteen_id)?.name||'All canteens')} · ${fmtDate(a.created_at)}, ${fmtTime(a.created_at)}</div></div>
+        <button class="btn danger sm" data-delann="${a.announcement_id}">Delete</button></div>`).join('')
+        :'<p class="muted" style="padding:1.2rem 0;text-align:center">No notices posted. Use this for closures, timing changes and maintenance.</p>'}
+    </div>
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.6rem">Post a notice</h3>
+      <form id="annForm">
+        <label class="field"><span>Canteen</span><select class="input" name="canteen_id">
+          ${DB.canteens.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select></label>
+        <label class="field"><span>Title</span><input class="input" name="title" placeholder="Counter closed at 4 pm" required></label>
+        <label class="field"><span>Message</span><textarea class="input" name="message" rows="3" required></textarea></label>
+        <button class="btn block">Post notice</button>
+      </form>
+      <p class="muted" style="font-size:.82rem;margin-top:.8rem">Notices are for operations only — closures, timings, maintenance.</p>
+    </div></div>`;
+}
+
+/* ---------------- users ---------------- */
+function viewUsers(){
+  return head('Users', `<button class="btn sm" data-newuser>Add user</button>`) +
+  `<div class="scroll-x"><table><thead><tr><th>User ID</th><th>Name</th><th>Role</th><th>Department</th><th>Year</th><th>Contact</th><th>Orders</th></tr></thead>
+    <tbody>${DB.users.map(u=>`<tr>
+      <td><b>${esc(u.user_id)}</b></td><td>${esc(u.name)}</td><td>${roleLabel(u.role)}</td>
+      <td>${esc(u.department||'—')}</td><td>${esc(u.year||'—')}</td>
+      <td>${esc(u.email)}<br><span class="muted" style="font-size:.8rem">${esc(u.phone)}</span></td>
+      <td>${DB.orders.filter(o=>o.user_id===u.user_id).length}</td></tr>`).join('')}</tbody></table></div>
+    <p class="muted" style="font-size:.84rem;margin-top:1rem">Each account keeps its own unique ID, password hash, order history and favourites.</p>`;
+}
+function userForm(){
+  modal(`<div class="sheet"><header><h3>Add user</h3><button class="x" data-close>×</button></header>
+  <form class="pad" id="userForm">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+      <label class="field"><span>Role</span><select class="input" name="role">
+        <option value="student">Student</option><option value="teacher">Teacher</option><option value="admin">Canteen staff</option></select></label>
+      <label class="field"><span>User ID</span><input class="input" name="user_id" placeholder="24CSE5678" required></label>
+    </div>
+    <label class="field"><span>Name</span><input class="input" name="name" required></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+      <label class="field"><span>Department</span><input class="input" name="department"></label>
+      <label class="field"><span>Year</span><input class="input" name="year" placeholder="II"></label>
+      <label class="field"><span>Email</span><input class="input" type="email" name="email"></label>
+      <label class="field"><span>Phone</span><input class="input" name="phone"></label>
+    </div>
+    <label class="field"><span>Temporary password</span><input class="input" name="pw" minlength="6" required></label>
+    <p class="err" id="userErr"></p>
+    <button class="btn block">Create account</button>
+  </form></div>`);
+}
+
+/* ---------------- settings ---------------- */
+function viewSettings(){
+  return head('Settings') + `<div class="two-col">
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.5rem">Appearance</h3>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+        <button class="chip" data-theme="auto">Match device</button>
+        <button class="chip" data-theme="light">Light</button>
+        <button class="chip" data-theme="dark">Dark</button>
+      </div>
+      <h3 style="font-size:1.02rem;margin:1.3rem 0 .5rem">Optional modules</h3>
+      <p class="muted" style="font-size:.88rem;margin:0 0 .6rem">Built as separate pieces so they can be switched on later without reworking the app.</p>
+      ${['QR-code ordering','Token number system','Pre-ordering for a pickup time','Canteen crowd status','Food ratings and feedback','QR-code pickup verification']
+        .map(m=>`<div class="total"><span>${m}</span><span class="status done">Not enabled</span></div>`).join('')}
+    </div>
+    <div class="card" style="padding:1rem">
+      <h3 style="font-size:1.02rem;margin-bottom:.5rem">Data</h3>
+      <p class="muted" style="font-size:.88rem">All records live in this browser's storage: ${DB.users.length} users, ${DB.foods.length} food items, ${DB.orders.length} orders.</p>
+      <button class="btn ghost sm block" style="margin-top:.6rem" id="exportBtn">Copy data as JSON</button>
+      <button class="btn danger sm block" style="margin-top:.5rem" id="resetBtn">Reset to seed data</button>
+    </div></div>`;
+}
+
+/* ---------------- modal ---------------- */
+function modal(html){
+  const host = $('#modalHost');
+  host.innerHTML = `<div class="scrim">${html}</div>`;
+  const scrim = host.querySelector('.scrim');
+  scrim.addEventListener('click', e=>{ if(e.target===scrim) closeModal(); });
+  host.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModal);
+  document.addEventListener('keydown', escClose);
+  wireModal();
+}
+function closeModal(){ $('#modalHost').innerHTML=''; document.removeEventListener('keydown', escClose); }
+function escClose(e){ if(e.key==='Escape') closeModal(); }
+
+function wireModal(){
+  const host = $('#modalHost');
+  let q = 1;
+  host.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{
+    q = Math.max(1, q + Number(b.dataset.q)); host.querySelector('#dq').textContent = q;
+  });
+  const aq = host.querySelector('[data-addq]');
+  if(aq) aq.onclick = ()=>{ addToCart(aq.dataset.addq, q); closeModal(); };
+  host.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{ toggleFav(b.dataset.fav); closeModal(); render(); });
+
+  const ff = host.querySelector('#foodForm');
+  if(ff) ff.onsubmit = e=>{
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(ff));
+    const rec = {
+      name:d.name.trim(), description:d.description.trim(), canteen_id:d.canteen_id, category_id:d.category_id,
+      price: d.price==='' ? null : Number(d.price),
+      preparation_time: Number(d.preparation_time), dietary_type:d.dietary_type,
+      availability: d.availability==='1'
+    };
+    const id = ff.dataset.id;
+    if(id){ Object.assign(DB.foods.find(f=>f.food_id===id), rec); toast('Item updated','good'); }
+    else {
+      const n = DB.foods.length+1;
+      DB.foods.push({ food_id:'F'+String(n).padStart(3,'0')+Math.random().toString(36).slice(2,4).toUpperCase(), image:'', ...rec });
+      toast('Item added','good');
+    }
+    save(); closeModal(); render();
+  };
+
+  const uf = host.querySelector('#userForm');
+  if(uf) uf.onsubmit = async e=>{
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(uf));
+    const id = d.user_id.trim().toUpperCase();
+    if(DB.users.some(u=>u.user_id.toUpperCase()===id)){ host.querySelector('#userErr').textContent='That user ID is already taken.'; return; }
+    DB.users.push({ user_id:id, name:d.name.trim(), email:d.email, phone:d.phone, department:d.department,
+      year:d.year, role:d.role, password_hash: await sha256(d.pw), avatar:'' });
+    save(); closeModal(); render(); toast('Account created','good');
+  };
+}
+
+/* ---------------- page wiring ---------------- */
+function wire(){
+  const V = $('#view');
+  V.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+  V.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ S.canteen=b.dataset.pick; S.cat='all'; S.q=''; go('menu'); });
+  V.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openDetail(b.dataset.detail));
+  V.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{ addToCart(b.dataset.add,1); });
+  V.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{ toggleFav(b.dataset.fav); render(); });
+  V.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>openTrack(b.dataset.track));
+  V.querySelectorAll('[data-reorder]').forEach(b=>b.onclick=()=>reorder(b.dataset.reorder));
+  V.querySelectorAll('[data-cat]').forEach(b=>b.onclick=()=>{ S.cat=b.dataset.cat; render(); });
+  V.querySelectorAll('[data-diet]').forEach(b=>b.onclick=()=>{ S.diet = S.diet===b.dataset.diet?'all':b.dataset.diet; render(); });
+  const av = V.querySelector('[data-avail]'); if(av) av.onclick=()=>{ S.availOnly=!S.availOnly; render(); };
+  const cl = V.querySelector('[data-clear]'); if(cl) cl.onclick=()=>{ S.q=''; S.cat='all'; S.diet='all'; S.availOnly=false; render(); };
+
+  const q = V.querySelector('#q');
+  if(q){ q.oninput = ()=>{ S.q=q.value; const pos=q.selectionStart; render(); const n=$('#q'); if(n){ n.focus(); n.setSelectionRange(pos,pos); } }; }
+
+  V.querySelectorAll('[data-cq]').forEach(b=>b.onclick=()=>{
+    const [fid,d] = b.dataset.cq.split(':');
+    const line = CART.find(l=>l.food_id===fid);
+    line.qty += Number(d);
+    if(line.qty<1) CART = CART.filter(l=>l.food_id!==fid);
+    if(!CART.length) S.cartCanteen=null;
+    render();
+  });
+  V.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{
+    CART = CART.filter(l=>l.food_id!==b.dataset.rm); if(!CART.length) S.cartCanteen=null; render();
+  });
+  const notes = V.querySelector('#notes'); if(notes) notes.oninput=()=>{ S.notes = notes.value; };
+  const po = V.querySelector('#placeOrder'); if(po) po.onclick = placeOrder;
+
+  // profile
+  const pf = V.querySelector('#profForm');
+  if(pf) pf.onsubmit = e=>{ e.preventDefault();
+    const d = Object.fromEntries(new FormData(pf));
+    Object.assign(S.user, {name:d.name.trim(), department:d.department, year:d.year||S.user.year, email:d.email, phone:d.phone});
+    save(); render(); buildNav(); toast('Profile saved','good'); };
+  const pw = V.querySelector('#pwForm');
+  if(pw) pw.onsubmit = async e=>{ e.preventDefault();
+    const d = Object.fromEntries(new FormData(pw));
+    const err = $('#pwErr');
+    if(await sha256(d.old) !== S.user.password_hash){ err.textContent='Your current password is not correct.'; return; }
+    if(d.new !== d.confirm){ err.textContent='The two new passwords don’t match.'; return; }
+    S.user.password_hash = await sha256(d.new); save(); err.textContent=''; pw.reset(); toast('Password updated','good'); };
+
+  // admin
+  V.querySelectorAll('[data-adv]').forEach(b=>b.onclick=()=>advance(b.dataset.adv));
+  V.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>cancelOrder(b.dataset.cancel));
+  V.querySelectorAll('[data-of]').forEach(b=>b.onclick=()=>{ S.ofilter=b.dataset.of; render(); });
+  V.querySelectorAll('[data-newfood]').forEach(b=>b.onclick=()=>foodForm(null));
+  V.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>foodForm(foodOf(b.dataset.edit)));
+  V.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const f = foodOf(b.dataset.del);
+    if(!confirm(`Delete “${f.name}” from the menu?`)) return;
+    DB.foods = DB.foods.filter(x=>x.food_id!==f.food_id);
+    DB.favorites = DB.favorites.filter(x=>x.food_id!==f.food_id);
+    save(); render(); toast('Item deleted');
+  });
+  V.querySelectorAll('[data-avail-toggle]').forEach(b=>b.onclick=()=>{
+    const f = foodOf(b.dataset.availToggle); f.availability = !f.availability; save(); render();
+  });
+  const mc = V.querySelector('#mcanteen'); if(mc) mc.onchange=()=>{ S.mcanteen=mc.value; render(); };
+  const mq = V.querySelector('#mq'); if(mq) mq.oninput=()=>{ S.mq=mq.value; const p=mq.selectionStart; render(); const n=$('#mq'); if(n){n.focus();n.setSelectionRange(p,p);} };
+
+  V.querySelectorAll('[data-cfield]').forEach(i=>i.onchange=()=>{
+    const [cid,key] = i.dataset.cfield.split(':');
+    canteenOf(cid)[key] = i.value; save(); toast('Canteen updated','good');
+  });
+  const af = V.querySelector('#annForm');
+  if(af) af.onsubmit = e=>{ e.preventDefault();
+    const d = Object.fromEntries(new FormData(af));
+    DB.announcements.unshift({ announcement_id:'A'+Math.random().toString(36).slice(2,8),
+      canteen_id:d.canteen_id, title:d.title.trim(), message:d.message.trim(), created_at:now() });
+    DB.users.filter(u=>u.role!=='admin').forEach(u=>notify(u.user_id, 'Notice: '+d.title.trim()));
+    save(); render(); toast('Notice posted','good'); };
+  V.querySelectorAll('[data-delann]').forEach(b=>b.onclick=()=>{
+    DB.announcements = DB.announcements.filter(a=>a.announcement_id!==b.dataset.delann); save(); render(); });
+  V.querySelectorAll('[data-newuser]').forEach(b=>b.onclick=userForm);
+
+  V.querySelectorAll('[data-theme]').forEach(b=>b.onclick=()=>{
+    const t = b.dataset.theme;
+    if(t==='auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    try{ localStorage.setItem('cc.theme', t); }catch(e){}
+  });
+  const ex = V.querySelector('#exportBtn');
+  if(ex) ex.onclick = async()=>{ try{ await navigator.clipboard.writeText(JSON.stringify(DB,null,2)); toast('Data copied to clipboard','good'); }
+    catch(e){ toast('Clipboard blocked in this view','bad'); } };
+  const rs = V.querySelector('#resetBtn');
+  if(rs) rs.onclick = async()=>{ if(!confirm('Reset all orders, users and menu edits back to the seed data?')) return;
+    try{ localStorage.removeItem(LS.key); }catch(e){}
+    DB=null; await boot(); signOut(); toast('Reset to seed data'); };
+}
+
+/* ---------------- start ---------------- */
+try{ const t = localStorage.getItem('cc.theme'); if(t && t!=='auto') document.documentElement.setAttribute('data-theme', t); }catch(e){}
+boot();
+</script>
+</body>
+</html>
